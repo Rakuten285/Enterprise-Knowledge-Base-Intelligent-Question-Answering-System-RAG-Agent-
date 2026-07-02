@@ -1,0 +1,46 @@
+# Claude Code 会话文件
+.claude/
+
+# 根目录下的旧评测结果目录（数据在 data/eval_results/）
+eval_results/
+
+# 环境
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# 模型文件（体积过大，克隆后自行下载）
+models/
+
+# 向量库索引（由 build_index.py 自动生成）
+data/vectorstore/
+
+# 评测结果（本地实验产物）
+data/eval_results/
+
+# 员工数据库（示例数据，可选上传）
+data/*.db
+
+# 日志
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker 持久化数据
+docker/redis_data/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: rag-agent-api
+    ports:
+      - "8000:8000"
+    environment:
+      # LLM
+      - LLM_PROVIDER=deepseek
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      # Embedding（容器内使用本地模型路径）
+      - EMBEDDING_PROVIDER=bge_local
+      - BGE_MODEL_NAME=./models/BAAI/bge-small-zh-v1___5
+      # 检索参数（最优值）
+      - CHUNK_SIZE=800
+      - CHUNK_OVERLAP=50
+      - TOP_K=8
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # LangSmith（可选，不填则不追踪）
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - LANGCHAIN_PROJECT=enterprise-rag-agent
+    volumes:
+      # 持久化向量库和数据库，容器重启不丢失
+      - ../data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: rag-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis_data:
